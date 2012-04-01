@@ -1,0 +1,8 @@
+
+
+*.dSYM
+build/
+nbproject/
+.dep.inc
+filehasher
+
