@@ -8,8 +8,8 @@
 #ifndef MAIN_H
 #define	MAIN_H
 
-void traverse(char * path);
-
+void tree(char * path);
+void hash(char * file, int file_id);
 
 #endif	/* MAIN_H */
 

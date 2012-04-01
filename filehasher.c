@@ -38,18 +38,28 @@ int main(int argc, char* argv[]) {
     // Set the size
     size = atoi(argv[2]);
     
+    if (size < 20) {
+        printf("There is no use in using sizes lesser than 20!\nExiting...\n");
+        exit(1);
+    }
+    
     // Start by connecting to the database
     database_init(&conn, server, port, user, password, database);
     
     // Traverse through the specified path
-    traverse(argv[1]);
+    tree(argv[1]);
     
+    // Close the database connection
+    database_close(conn);
     
     return EXIT_SUCCESS;
 }
 
-
-void traverse(char * path) {
+/**
+ * Traverses 
+ * @param path
+ */
+void tree(char * path) {
     
     struct dirent * info[MAX_DIRECTORY_SIZE];
     char newpath[MAX_PATH_SIZE];
@@ -59,20 +69,55 @@ void traverse(char * path) {
     for (i = 0; i < found; i++) {
         sprintf(newpath, "%s/%s", path, info[i]->d_name);
         printf("[INFO] Path: %s\n", newpath);
-        traverse(newpath);
+        tree(newpath);
     }
     
     found = getfiles(path, info);
     for (i = 0; i < found; i++) {
         sprintf(newpath, "%s/%s", path, info[i]->d_name);
+        
+        // Add file to the database
         file_id = add_file(conn, newpath);
-        if (file_id <= 0) {
-            fprintf(stderr, "[ERROR] Couldn't add file: %s to database\n", newpath);
-        } else {
+        
+        // Check if it was added correctly
+        if (file_id > 0) {
+            // Debug print
             printf("[INFO] Adding file: %s to database with id: %i\n", newpath, file_id);
+            
+            // Add hashes for that file
+            hash(newpath, file_id);
+        } else {
+            fprintf(stderr, "[ERROR] Couldn't add file: %s to database\n", newpath);
+        }
+    }
+}
+
+
+void hash(char * file, int file_id) {
+    FILE *fp;
+    unsigned char block[size];
+    unsigned char md[SHA_DIGEST_LENGTH];
+    int i=0;
+    
+    // Open file with read-only
+    fp = fopen(file, "r");
+    
+    if (fp == NULL) {
+        fprintf(stderr, "[ERROR] The file: %s, didn't exist or couldn't be read\n", file);
+    }
+
+    while (fread(block, size, 1, fp) > 0) {
+        // Hash the block
+        SHA1(block, sizeof(block), md);
+        
+        if (add_hash(conn, size, md, file_id, i) > 0) {
+            printf("[INFO] Added block nr: %i to database for file: %s\n", i, file);
+        } else {
+            fprintf(stderr, "Couldn't add block nr: %i to database for file: %s\n", i, file);
         }
     }
     
+    // Close the file
+    fclose(fp);
 }
-
 
