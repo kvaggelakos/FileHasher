@@ -81,11 +81,11 @@ int add_hash(MYSQL * conn, int size, char * hash, int file, int block) {
     }
     
     char query[300];
-    sprintf(query, "INSERT INTO %s (size, hash, file, block) VALUES ('%i', '%s', '%i', '%i'",
+    sprintf(query, "INSERT INTO %s (size, hash, file, block) VALUES ('%i', '%s', '%i', '%i')",
             TABLE_HASHES, size, hash, file, block);
     
     if (mysql_query(conn, query)) {
-        fprintf(stderr, "There was an error adding the hash for file: %i\nError: ",
+        fprintf(stderr, "There was an error adding the hash for file: %i\nError:%s\n",
                 file, mysql_error(conn));
         return -1;
     }

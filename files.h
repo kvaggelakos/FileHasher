@@ -9,6 +9,7 @@
 #define	FILES_H
 
 #define MAX_DIRECTORY_SIZE 200
+#define MAX_PATH_SIZE 150
 
 int getfiles(char * path, struct dirent ** files);
 int getdirs(char * path, struct dirent ** dirs);

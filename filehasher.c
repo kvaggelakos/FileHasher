@@ -28,20 +28,42 @@ MYSQL *conn;
 
 int main(int argc, char* argv[]) {
 
-    if (argc != 2) {
-        printf("Usage: %s [PATH]\n", argv[0]);
+    // TODO: Change argc check
+    if (argc != 1) {
+        printf("Usage: %s [PATH] [SIZE]\n", argv[0]);
         return EXIT_FAILURE;
     }
     
     // Start by connecting to the database
-    database_init(&conn, server, port, user, password, database);
+    //database_init(&conn, server, port, user, password, database);
     
+    test("/tmp/hash");
     
     
     return EXIT_SUCCESS;
 }
 
 
+void traverse(char * path) {
+    
+    struct dirent * info[MAX_DIRECTORY_SIZE];
+    char newpath[MAX_PATH_SIZE];
+    int found, i;
+    
+    
+    found = getdirs(path, info);
+    for (i = 0; i < found; i++) {
+        sprintf(newpath, "%s/%s", path, info[i]->d_name);
+        printf("Path: %s\n", newpath);
+        traverse(newpath);
+    }
 
+    found = getfiles(path, info);
+    for (i = 0; i < found; i++) {
+        sprintf(newpath, "%s/%s", path, info[i]->d_name);
+        printf("File: %s\n", newpath);
+    }
+    
+}
 
 

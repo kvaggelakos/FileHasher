@@ -8,6 +8,7 @@
 #ifndef MAIN_H
 #define	MAIN_H
 
+void test(char * path);
 
 
 #endif	/* MAIN_H */
