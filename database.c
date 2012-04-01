@@ -73,7 +73,7 @@ int add_file(MYSQL * conn, char * path) {
  * @return -1 if there was an error with the connection or query. Otherwise a positive 
  * integer containing the id of the newly inserted object.
  */
-int add_hash(MYSQL * conn, int size, unsigned char * hash, int file, int block) {
+int add_hash(MYSQL * conn, int size, char * hash, int file, int block) {
     
     if (conn == NULL) {
         return -1;

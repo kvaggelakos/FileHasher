@@ -15,7 +15,7 @@ void database_init(MYSQL ** conn, char * address, int port, char * user, char * 
         char * database);
 void database_close(MYSQL * conn);
 int add_file(MYSQL * conn, char * filename);
-int add_hash(MYSQL * conn, int size, unsigned char * hash, int file, int block);
+int add_hash(MYSQL * conn, int size, char * hash, int file, int block);
 
 
 #endif	/* DATABASE_H */
