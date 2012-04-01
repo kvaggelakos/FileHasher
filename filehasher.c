@@ -25,19 +25,24 @@ char *database = "FileHasher";
 
 MYSQL *conn;
 
+int size;
+
 
 int main(int argc, char* argv[]) {
 
-    // TODO: Change argc check
-    if (argc != 1) {
+    if (argc != 3) {
         printf("Usage: %s [PATH] [SIZE]\n", argv[0]);
         return EXIT_FAILURE;
     }
     
-    // Start by connecting to the database
-    //database_init(&conn, server, port, user, password, database);
+    // Set the size
+    size = atoi(argv[2]);
     
-    traverse("/tmp/hash");
+    // Start by connecting to the database
+    database_init(&conn, server, port, user, password, database);
+    
+    // Traverse through the specified path
+    traverse(argv[1]);
     
     
     return EXIT_SUCCESS;
@@ -48,19 +53,24 @@ void traverse(char * path) {
     
     struct dirent * info[MAX_DIRECTORY_SIZE];
     char newpath[MAX_PATH_SIZE];
-    int found, i;
+    int found, i, file_id;
     
     found = getdirs(path, info);
     for (i = 0; i < found; i++) {
         sprintf(newpath, "%s/%s", path, info[i]->d_name);
-        printf("Path: %s\n", newpath);
+        printf("[INFO] Path: %s\n", newpath);
         traverse(newpath);
     }
     
     found = getfiles(path, info);
     for (i = 0; i < found; i++) {
         sprintf(newpath, "%s/%s", path, info[i]->d_name);
-        printf("File: %s\n", newpath);
+        file_id = add_file(conn, newpath);
+        if (file_id <= 0) {
+            fprintf(stderr, "[ERROR] Couldn't add file: %s to database\n", newpath);
+        } else {
+            printf("[INFO] Adding file: %s to database with id: %i\n", newpath, file_id);
+        }
     }
     
 }

@@ -51,7 +51,6 @@ int add_file(MYSQL * conn, char * path) {
     
     char query[100];
     sprintf(query, "INSERT INTO %s (path) VALUES ('%s')", TABLE_FILES, path);
-    printf("Query: %s\n", query);
     
     if (mysql_query(conn, query)) {
         fprintf(stderr, "There was an error adding the file: %s to the database.\nError: %s\n",
