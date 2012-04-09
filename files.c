@@ -19,7 +19,7 @@
  * @param files An array of dirent pointers where the result will be stored
  * @return -1 if path didn't exist. Othwerwise the number of files found.
  */
-int getfiles(char * path, struct dirent ** files) {
+int list_files(char * path, struct dirent ** files) {
     
     DIR *dir = opendir(path);
     int i = 0;
@@ -48,7 +48,7 @@ int getfiles(char * path, struct dirent ** files) {
  * @param dirs An arrat of dirent pointers where the result will be stored
  * @return -1 if the path didn't exist. Otherwise the number of folders found
  */
-int getdirs(char * path, struct dirent ** dirs) {
+int list_dirs(char * path, struct dirent ** dirs) {
     
     DIR *dir = opendir(path);
     int i = 0;

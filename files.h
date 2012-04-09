@@ -8,11 +8,11 @@
 #ifndef FILES_H
 #define	FILES_H
 
-#define MAX_DIRECTORY_SIZE 200
-#define MAX_PATH_SIZE 150
+#define MAX_DIRECTORY_SIZE 500
+#define MAX_PATH_SIZE 1000
 
-int getfiles(char * path, struct dirent ** files);
-int getdirs(char * path, struct dirent ** dirs);
+int list_files(char * path, struct dirent ** files);
+int list_dirs(char * path, struct dirent ** dirs);
 
 #endif	/* FILES_H */
 

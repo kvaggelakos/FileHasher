@@ -35,6 +35,11 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
     
+    if (!opendir(argv[1])) {
+        printf("The path specified doesn't exist!\n");
+        exit(1);
+    }
+    
     // Set the size
     size = atoi(argv[2]);
     
@@ -42,40 +47,39 @@ int main(int argc, char* argv[]) {
         printf("There is no use in using sizes lesser than 20!\nExiting...\n");
         exit(1);
     }
-    
+     
     // Start by connecting to the database
-    database_init(&conn, server, port, user, password, database);
+    //database_init(&conn, server, port, user, password, database);
     
-    // Traverse through the specified path
+    // Tree through the specified path
     tree(argv[1]);
     
     // Close the database connection
-    database_close(conn);
+    //database_close(conn);
     
     return EXIT_SUCCESS;
 }
 
-/**
- * Traverses 
- * @param path
- */
+
 void tree(char * path) {
     
     struct dirent * info[MAX_DIRECTORY_SIZE];
     char newpath[MAX_PATH_SIZE];
     int found, i, file_id;
     
-    found = getdirs(path, info);
+    found = list_dirs(path, info);
     for (i = 0; i < found; i++) {
+        remove_trailing_slash(path);
         sprintf(newpath, "%s/%s", path, info[i]->d_name);
         printf("[INFO] Path: %s\n", newpath);
         tree(newpath);
     }
-    
-    found = getfiles(path, info);
-    for (i = 0; i < found; i++) {
-        sprintf(newpath, "%s/%s", path, info[i]->d_name);
         
+    found = list_files(path, info);
+    for (i = 0; i < found; i++) {
+        remove_trailing_slash(path);
+        sprintf(newpath, "%s/%s", path, info[i]->d_name);
+        printf("[INFO] File: %s\n", newpath);
         // Add file to the database
         file_id = add_file(conn, newpath);
         
@@ -118,7 +122,6 @@ void hash(char * file, int file_id) {
         for (j=0; j < SHA_DIGEST_LENGTH; j++) {
             sprintf(md_hex_ptr, "%02x", md[j]);
             md_hex_ptr += 2;
-            printf("Hex: %02x\n", md[j]);
         }
         
         if (add_hash(conn, size, md_hex, file_id, i)) {
@@ -130,5 +133,12 @@ void hash(char * file, int file_id) {
     
     // Close the file
     fclose(fp);
+}
+
+void remove_trailing_slash(char * buf) {
+    size_t size = strlen(buf) - 1;
+    if (buf[size] == '/') {
+        buf[size] = '\0';
+    }
 }
 
