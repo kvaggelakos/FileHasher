@@ -13,6 +13,7 @@
 
 int list_files(char * path, struct dirent * files);
 int list_dirs(char * path, struct dirent * dirs);
+void tree(char * path, int size, MYSQL * conn);
 
 #endif	/* FILES_H */
 

@@ -4,7 +4,7 @@
 
 # Declare the mysql_config_path
 mysql_config_path = /usr/local/bin/mysql_config
-files = filehasher.c files.c database.c hex.c
+files = filehasher.c files.c database.c hash.c utils.c
 executable = filehasher
 
 

@@ -8,9 +8,8 @@
 #ifndef MAIN_H
 #define	MAIN_H
 
-void tree(char * path);
-void hash(char * file, int file_id);
-void remove_trailing_slash(char * buf);
+void usage(char * argv0);
+
 
 #endif	/* MAIN_H */
 
