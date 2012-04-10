@@ -11,8 +11,8 @@
 #define MAX_DIRECTORY_SIZE 500
 #define MAX_PATH_SIZE 1000
 
-int list_files(char * path, struct dirent ** files);
-int list_dirs(char * path, struct dirent ** dirs);
+int list_files(char * path, struct dirent * files);
+int list_dirs(char * path, struct dirent * dirs);
 
 #endif	/* FILES_H */
 

@@ -11,6 +11,7 @@
 #include <openssl/sha.h>
 #include <string.h>
 #include <dirent.h>
+#include <sys/stat.h>
 
 
 #include "filehasher.h"
@@ -49,13 +50,13 @@ int main(int argc, char* argv[]) {
     }
      
     // Start by connecting to the database
-    //database_init(&conn, server, port, user, password, database);
+    database_init(&conn, server, port, user, password, database);
     
     // Tree through the specified path
     tree(argv[1]);
     
     // Close the database connection
-    //database_close(conn);
+    database_close(conn);
     
     return EXIT_SUCCESS;
 }
@@ -63,14 +64,15 @@ int main(int argc, char* argv[]) {
 
 void tree(char * path) {
     
-    struct dirent * info[MAX_DIRECTORY_SIZE];
+    struct dirent info[MAX_DIRECTORY_SIZE];
     char newpath[MAX_PATH_SIZE];
     int found, i, file_id;
+    struct stat st;
     
     found = list_dirs(path, info);
     for (i = 0; i < found; i++) {
         remove_trailing_slash(path);
-        sprintf(newpath, "%s/%s", path, info[i]->d_name);
+        sprintf(newpath, "%s/%s", path, info[i].d_name);
         printf("[INFO] Path: %s\n", newpath);
         tree(newpath);
     }
@@ -78,8 +80,15 @@ void tree(char * path) {
     found = list_files(path, info);
     for (i = 0; i < found; i++) {
         remove_trailing_slash(path);
-        sprintf(newpath, "%s/%s", path, info[i]->d_name);
+        sprintf(newpath, "%s/%s", path, info[i].d_name);
         printf("[INFO] File: %s\n", newpath);
+
+        // Check that the file is big enough to care about (filesize > size)
+        stat(newpath, &st);
+        if (st.st_size < size) {
+            continue;
+        }
+        
         // Add file to the database
         file_id = add_file(conn, newpath);
         
@@ -101,9 +110,9 @@ void hash(char * file, int file_id) {
     FILE *fp;
     unsigned char block[size];
     unsigned char md[SHA_DIGEST_LENGTH];
-    char md_hex[SHA_DIGEST_LENGTH * 2]; // x2 since each has a 0xXX represenataion
-    char *md_hex_ptr = md_hex;
-    int i=0,read;
+    char md_hex[SHA_DIGEST_LENGTH * 2]; // x2 since each has a XX representation
+    char *md_hex_ptr;
+    int read, i, j;
     
     // Open file with read-only
     fp = fopen(file, "r");
@@ -112,22 +121,26 @@ void hash(char * file, int file_id) {
         fprintf(stderr, "[ERROR] The file: %s, didn't exist or couldn't be read\n", file);
     }
 
+    i = 0;
     while ((read = fread(block, size, 1, fp)) > 0) {
-        // Hash the block
-        SHA1(block, read, md);
+        // Reset the pointer
+        md_hex_ptr = md_hex;
         
+        // Hash the block
+        SHA1(block, size, md);
         
         // Replace each char with its hexadecimal representation
-        int j;
-        for (j=0; j < SHA_DIGEST_LENGTH; j++) {
+        for (j = 0; j < SHA_DIGEST_LENGTH; j++) {
             sprintf(md_hex_ptr, "%02x", md[j]);
             md_hex_ptr += 2;
         }
         
-        if (add_hash(conn, size, md_hex, file_id, i)) {
-            printf("[INFO] Added block nr: %i to database for file: %s\n", i, file);
+        if (add_hash(conn, size, md_hex, file_id, i++)) {
+#ifdef DEBUG
+            printf("[INFO] Added block nr: %i to database for file: %s\n", i - 1, file);
+#endif
         } else {
-            fprintf(stderr, "Couldn't add block nr: %i to database for file: %s\n", i, file);
+            fprintf(stderr, "Couldn't add block nr: %i to database for file: %s\n", i - 1, file);
         }
     }
     
